@@ -1,8 +1,19 @@
 import { createClient } from '@/lib/supabase/server'
 
+type MyStreaks = {
+  morning_current: number
+  morning_longest: number
+  logged_today_morning: boolean
+  evening_current: number
+  evening_longest: number
+  logged_today_evening: boolean
+}
+
 export default async function StreakCard() {
   const supabase = await createClient()
-  const { data } = await supabase.rpc('my_streaks').single()
+  const { data } = (await supabase.rpc('my_streaks').single()) as unknown as {
+    data: MyStreaks | null
+  }
   if (!data) return null
 
   const rows = [
