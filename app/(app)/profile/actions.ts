@@ -2,11 +2,20 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import {
+  COLOR_KEYS,
+  COLOR_LABELS,
+  THEME_COLORS,
+  isThemeId,
+  normalizeHex,
+  type ColorKey,
+  type Colors,
+} from '@/lib/themes'
+import { readabilityIssues } from '@/lib/contrast'
 
-const THEMES = ['dawn', 'vesper', 'cedar', 'linen', 'tide', 'ink'] as const
 const LOCALES = ['en', 'ko'] as const
 
-type AppearanceState = { ok: false; message: string } | { ok: true }
+type AppearanceState = { ok: false; message: string } | { ok: true; saved?: true }
 
 export async function updateAppearance(
   _prevState: AppearanceState,
@@ -17,7 +26,7 @@ export async function updateAppearance(
   if (!user) throw new Error('Not signed in')
 
   const theme = form.get('theme') as string
-  if (!THEMES.includes(theme as any)) {
+  if (!isThemeId(theme)) {
     return { ok: false, message: 'Pick one of the available themes.' }
   }
 
@@ -26,17 +35,32 @@ export async function updateAppearance(
     return { ok: false, message: 'Pick one of the available languages.' }
   }
 
-  const accentRaw = ((form.get('accent_color') as string) || '').trim() || null
-  if (accentRaw && !/^#[0-9a-fA-F]{6}$/.test(accentRaw)) {
-    return { ok: false, message: 'Accent colour needs to be a hex value like #0f766e.' }
+  // Colour overrides: one `color_<key>` field per colour, blank = use the theme's own.
+  const overrides: Partial<Colors> = {}
+  for (const key of COLOR_KEYS) {
+    const raw = ((form.get(`color_${key}`) as string) || '').trim()
+    if (!raw) continue
+    const hex = normalizeHex(raw)
+    if (!hex) {
+      return { ok: false, message: `${COLOR_LABELS[key].label} needs to be a hex value like #0f766e.` }
+    }
+    overrides[key] = hex
   }
+
+  const changed = Object.keys(overrides) as ColorKey[]
+  const effective: Colors = { ...THEME_COLORS[theme], ...overrides }
+  const blocking = readabilityIssues(effective, changed).find((i) => i.level === 'error')
+  if (blocking) return { ok: false, message: blocking.message }
+
+  const { accent, ...customColors } = overrides
 
   const { error } = await supabase
     .from('profiles')
     .update({
       theme,
       locale,
-      accent_color: accentRaw,
+      accent_color: accent ?? null,
+      custom_colors: customColors,
       bio: ((form.get('bio') as string) || '').slice(0, 280) || null,
       show_on_leaderboard: form.get('show_on_leaderboard') === 'on',
     })
@@ -45,5 +69,5 @@ export async function updateAppearance(
   if (error) return { ok: false, message: error.message }
 
   revalidatePath('/', 'layout')
-  return { ok: true }
+  return { ok: true, saved: true }
 }
