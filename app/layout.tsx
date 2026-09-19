@@ -1,46 +1,63 @@
-import type { Metadata } from 'next'
-import './globals.css'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import type { Theme } from '@/lib/types'
+import SignOutButton from '@/components/SignOutButton'
+import Avatar from '@/components/Avatar'
+import { getDictionary } from '@/lib/i18n/dictionary'
 
-export const metadata: Metadata = {
-  title: 'Quiet Time',
-  description: 'Daily devotionals and spiritual journaling',
-}
-
-const VALID_THEMES: Theme[] = ['dawn', 'vesper', 'cedar', 'linen', 'tide', 'ink']
-
-export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let theme: Theme = 'dawn'
-  let accent: string | null = null
-
+  let profile: { display_name: string; avatar_path: string | null; role: string; locale: string } | null = null
   if (user) {
     const { data } = await supabase
       .from('profiles')
-      .select('theme, accent_color')
+      .select('display_name, avatar_path, role, locale')
       .eq('id', user.id)
       .single()
-
-    if (data?.theme && VALID_THEMES.includes(data.theme as Theme)) {
-      theme = data.theme as Theme
-    }
-    accent = data?.accent_color ?? null
+    profile = data
   }
 
+  const dict = getDictionary(profile?.locale ?? 'en')
+
+  const NAV = [
+    { href: '/dashboard', label: dict.nav.today },
+    { href: '/morning', label: dict.nav.morning },
+    { href: '/evening', label: dict.nav.evening },
+    { href: '/logs', label: dict.nav.pastLogs },
+    { href: '/rankings', label: dict.nav.rankings },
+    { href: '/profile', label: dict.nav.profile },
+  ]
+
   return (
-    <html
-      lang="en"
-      data-theme={theme}
-      style={accent ? ({ '--accent': accent } as React.CSSProperties) : undefined}
-    >
-      <body className="min-h-dvh font-sans antialiased">{children}</body>
-    </html>
+    <div className="min-h-dvh bg-bg">
+      <header className="border-b border-line bg-surface">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
+          <Link href="/dashboard" className="font-serif text-lg text-ink">Quiet Time</Link>
+          <div className="flex items-center gap-3">
+            {profile?.role === 'admin' && (
+              <Link href="/admin" className="text-sm text-muted hover:text-ink">{dict.nav.admin}</Link>
+            )}
+            <Link href="/profile" className="flex items-center gap-2">
+              <Avatar path={profile?.avatar_path ?? null} size={28} />
+              <span className="hidden text-sm text-ink sm:inline">{profile?.display_name}</span>
+            </Link>
+            <SignOutButton label={dict.common.signOut} />
+          </div>
+        </div>
+        <nav className="mx-auto flex max-w-4xl gap-1 overflow-x-auto px-4 pb-2 text-sm">
+          {NAV.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="whitespace-nowrap rounded-full px-3 py-1 text-muted hover:bg-bg hover:text-ink"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+      </header>
+      <main className="mx-auto max-w-4xl px-4 py-6">{children}</main>
+    </div>
   )
 }
