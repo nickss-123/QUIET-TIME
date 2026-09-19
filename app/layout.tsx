@@ -9,19 +9,19 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // Apply the signed-in member's saved theme and colour overrides on the server,
-  // so every page (including /admin) renders in their colours with no flash.
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   let theme = 'dawn'
   let style: React.CSSProperties | undefined
+
   if (user) {
     const { data } = await supabase
       .from('profiles')
       .select('theme, accent_color, custom_colors')
       .eq('id', user.id)
       .maybeSingle()
+
     if (data) {
       if (isThemeId(data.theme)) theme = data.theme
       style = overridesToStyle(overridesFromProfile(data.accent_color, data.custom_colors))
