@@ -13,9 +13,9 @@ export default async function CommunityPage() {
 
   const { data: comments } = await supabase
     .from('comments')
-    .select('id, body, created_at, user_id, profiles(display_name, avatar_path)')
-    .order('created_at', { ascending: false })
-    .limit(100)
+    .select('id, body, created_at, user_id, parent_id, profiles(display_name, avatar_path)')
+    .order('created_at', { ascending: true })
+    .limit(300)
 
   const normalized = (comments ?? []).map((c: any) => ({
     ...c,
