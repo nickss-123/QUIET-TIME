@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState } from 'react'
@@ -13,6 +12,12 @@ export default function ScheduleUploadForm() {
     e.preventDefault()
     const form = e.currentTarget
     const data = new FormData(form)
+
+    const file = data.get('file')
+    if (file instanceof File && file.size > 10 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'That file is over 10 MB. Compress it and try again.' })
+      return
+    }
 
     setBusy(true)
     setMessage(null)
@@ -59,8 +64,13 @@ export default function ScheduleUploadForm() {
         </div>
 
         <label className="block text-sm text-ink">
-          Schedule image
-          <input name="image" type="file" accept="image/*" required className={inputClass} />
+          Schedule image (max 10 MB)
+          <input name="file" type="file" accept="image/*" required className={inputClass} />
+        </label>
+
+        <label className="block text-sm text-ink">
+          Notes (optional)
+          <textarea name="notes" rows={2} className={inputClass} />
         </label>
 
         <button
@@ -80,3 +90,4 @@ export default function ScheduleUploadForm() {
     </section>
   )
 }
+
