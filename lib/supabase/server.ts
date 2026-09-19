@@ -1,11 +1,7 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { type CookieOptions } from '@supabase/ssr'
 
-// Server Component / Server Action client. Reads and (where possible)
-// refreshes the session cookie. Server Components can't set cookies, so
-// the try/catch below is expected there — middleware handles the refresh.
-export async function createClient() {
-  const cookieStore = await cookies()
+export function createClient() {
+  const cookieStore = cookies()
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,13 +9,15 @@ export async function createClient() {
     {
       cookies: {
         getAll: () => cookieStore.getAll(),
-        setAll: (list) => {
+        setAll: (list: { name: string; value: string; options?: CookieOptions }[]) => {
           try {
             list.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
             )
           } catch {
-            // Called from a Server Component render — safe to ignore.
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
           }
         },
       },
