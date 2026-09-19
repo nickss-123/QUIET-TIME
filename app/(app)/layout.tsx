@@ -2,29 +2,32 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import SignOutButton from '@/components/SignOutButton'
 import Avatar from '@/components/Avatar'
-
-const NAV = [
-  { href: '/dashboard', label: 'Today' },
-  { href: '/morning', label: 'Morning' },
-  { href: '/evening', label: 'Evening' },
-  { href: '/logs', label: 'Past logs' },
-  { href: '/rankings', label: 'Rankings' },
-  { href: '/profile', label: 'Profile' },
-]
+import { getDictionary } from '@/lib/i18n/dictionary'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let profile: { display_name: string; avatar_path: string | null; role: string } | null = null
+  let profile: { display_name: string; avatar_path: string | null; role: string; locale: string | null } | null = null
   if (user) {
     const { data } = await supabase
       .from('profiles')
-      .select('display_name, avatar_path, role')
+      .select('display_name, avatar_path, role, locale')
       .eq('id', user.id)
       .single()
     profile = data
   }
+
+  const dict = getDictionary(profile?.locale ?? 'en')
+
+  const NAV = [
+    { href: '/dashboard', label: dict.nav.today },
+    { href: '/morning', label: dict.nav.morning },
+    { href: '/evening', label: dict.nav.evening },
+    { href: '/logs', label: dict.nav.pastLogs },
+    { href: '/rankings', label: dict.nav.rankings },
+    { href: '/profile', label: dict.nav.profile },
+  ]
 
   return (
     <div className="min-h-dvh bg-bg">
@@ -33,13 +36,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <Link href="/dashboard" className="font-serif text-lg text-ink">Quiet Time</Link>
           <div className="flex items-center gap-3">
             {profile?.role === 'admin' && (
-              <Link href="/admin" className="text-sm text-muted hover:text-ink">Admin</Link>
+              <Link href="/admin" className="text-sm text-muted hover:text-ink">{dict.nav.admin}</Link>
             )}
             <Link href="/profile" className="flex items-center gap-2">
               <Avatar path={profile?.avatar_path ?? null} size={28} />
               <span className="hidden text-sm text-ink sm:inline">{profile?.display_name}</span>
             </Link>
-            <SignOutButton />
+            <SignOutButton label={dict.common.signOut} />
           </div>
         </div>
         <nav className="mx-auto flex max-w-4xl gap-1 overflow-x-auto px-4 pb-2 text-sm">
