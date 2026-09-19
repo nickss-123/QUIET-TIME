@@ -13,5 +13,10 @@ export default async function AdminUsersPage() {
     supabase.from('groups').select('id, name').order('name'),
   ])
 
-  return <UsersClient members={members ?? []} groups={groups ?? []} />
+  const normalizedMembers = (members ?? []).map((m: any) => ({
+    ...m,
+    groups: Array.isArray(m.groups) ? (m.groups[0] ?? null) : (m.groups ?? null),
+  }))
+
+  return <UsersClient members={normalizedMembers} groups={groups ?? []} />
 }
