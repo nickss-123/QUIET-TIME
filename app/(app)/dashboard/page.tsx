@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import StreakCard from '@/components/StreakCard'
 import ScheduleViewer from '@/components/ScheduleViewer'
+import type { Announcement } from '@/types/announcement'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -12,6 +13,7 @@ export default async function DashboardPage() {
     .lte('starts_on', new Date().toISOString().slice(0, 10))
     .order('created_at', { ascending: false })
     .limit(3)
+    .returns<Announcement[]>()
 
   return (
     <div className="space-y-6">
