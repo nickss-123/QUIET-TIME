@@ -28,7 +28,9 @@ export default function CommunityClient({
   const [pending, startTransition] = useTransition()
 
   function handleDelete(id: string) {
-    startTransition(() => deleteComment(id))
+    startTransition(() => {
+      deleteComment(id)
+    })
   }
 
   return (
@@ -50,34 +52,4 @@ export default function CommunityClient({
         <SaveButton />
       </form>
 
-      <div className="card divide-y divide-line">
-        {comments.length === 0 && (
-          <p className="p-4 text-muted">No one has posted yet. Be the first to ask or answer something.</p>
-        )}
-        {comments.map((c) => (
-          <div key={c.id} className="flex items-start gap-3 p-4">
-            <Avatar path={c.profiles?.avatar_path ?? null} size={32} />
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-medium text-ink">{c.profiles?.display_name ?? 'Member'}</p>
-                <p className="text-xs text-muted">
-                  {new Date(c.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                </p>
-              </div>
-              <p className="mt-1 whitespace-pre-wrap text-sm text-ink">{c.body}</p>
-              {(c.user_id === currentUserId || isAdmin) && (
-                <button
-                  onClick={() => handleDelete(c.id)}
-                  disabled={pending}
-                  className="mt-2 text-xs text-muted underline hover:text-ink"
-                >
-                  Delete
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
+      <div
