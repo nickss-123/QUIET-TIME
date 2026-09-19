@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { updateAppearance } from './actions'
 import SaveButton from '@/components/SaveButton'
 
@@ -17,6 +17,12 @@ const initialState = { ok: true as const }
 
 export default function AppearanceForm({ profile }: { profile: any }) {
   const [state, formAction] = useActionState(updateAppearance, initialState)
+  const [selectedTheme, setSelectedTheme] = useState<string>(profile.theme ?? 'dawn')
+
+  function previewTheme(themeId: string) {
+    setSelectedTheme(themeId)
+    document.documentElement.setAttribute('data-theme', themeId)
+  }
 
   return (
     <form action={formAction} className="card space-y-5 p-4">
@@ -33,13 +39,19 @@ export default function AppearanceForm({ profile }: { profile: any }) {
             <label
               key={t.id}
               data-theme={t.id}
-              className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-line bg-bg p-3"
+              onClick={() => previewTheme(t.id)}
+              className={`flex cursor-pointer flex-col items-center gap-2 rounded-lg border p-3 transition-colors ${
+                selectedTheme === t.id
+                  ? 'border-accent ring-2 ring-accent ring-offset-1'
+                  : 'border-line'
+              } bg-bg`}
             >
               <input
                 type="radio"
                 name="theme"
                 value={t.id}
-                defaultChecked={profile.theme === t.id}
+                checked={selectedTheme === t.id}
+                onChange={() => previewTheme(t.id)}
                 className="sr-only"
               />
               <span className="size-6 rounded-full bg-accent" />
@@ -47,6 +59,9 @@ export default function AppearanceForm({ profile }: { profile: any }) {
             </label>
           ))}
         </div>
+        <p className="mt-2 text-xs text-muted">
+          Preview updates immediately. Click Save below to keep it.
+        </p>
       </div>
 
       <div>
