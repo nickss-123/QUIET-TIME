@@ -14,6 +14,8 @@ export interface Profile {
   must_change_password: boolean
   theme: Theme
   accent_color: string | null
+  custom_colors: Partial<Record<'bg' | 'surface' | 'ink' | 'muted' | 'line', string>>
+  locale: string | null
   avatar_path: string | null
   show_on_leaderboard: boolean
   bio: string | null
