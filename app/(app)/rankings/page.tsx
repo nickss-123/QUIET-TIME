@@ -28,7 +28,7 @@ export default async function RankingsPage({
 
   const [{ data: board }, { data: rank }] = await Promise.all([
     supabase.rpc('leaderboard', { p_period: period, p_group: groupFilter, p_limit: 50 }),
-    supabase.rpc('my_rank', { p_period: period, p_group: groupFilter }).maybeSingle() as Promise<{ data: MyRank | null }>,
+    supabase.rpc('my_rank', { p_period: period, p_group: groupFilter }).maybeSingle() as unknown as Promise<{ data: MyRank | null }>,
   ])
 
   return (
