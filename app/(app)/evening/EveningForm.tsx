@@ -1,7 +1,8 @@
+
 // app/(app)/evening/EveningForm.tsx
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { saveEveningEntry } from './actions'
 import EntryShareControls from '@/components/EntryShareControls'
 import SaveButton from '@/components/SaveButton'
@@ -112,16 +113,35 @@ function Choice({
   options: string[]
   defaultValue?: string | null
 }) {
+  // The selection lives in state and is submitted through a hidden input, so the
+  // chosen option is always visibly highlighted and always what gets saved.
+  const [value, setValue] = useState(defaultValue ?? '')
+
   return (
-    <div>
-      <label className="mb-1 block text-sm font-medium text-ink">{label}</label>
+    <div role="radiogroup" aria-label={label}>
+      <p className="mb-1 text-sm font-medium text-ink">{label}</p>
+      <input type="hidden" name={name} value={value} />
       <div className="flex gap-2">
-        {options.map((opt) => (
-          <label key={opt} className="flex flex-1 cursor-pointer flex-col items-center rounded-lg border border-line py-2 text-sm">
-            <input type="radio" name={name} value={opt} defaultChecked={defaultValue === opt} className="sr-only" />
-            {opt}
-          </label>
-        ))}
+        {options.map((opt) => {
+          const selected = value === opt
+          return (
+            <button
+              key={opt}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => setValue(opt)}
+              className={
+                'min-h-[44px] flex-1 rounded-lg border py-2 text-sm transition-colors ' +
+                (selected
+                  ? 'border-accent bg-accent font-medium text-white'
+                  : 'border-line bg-surface text-ink hover:bg-bg')
+              }
+            >
+              {opt}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
