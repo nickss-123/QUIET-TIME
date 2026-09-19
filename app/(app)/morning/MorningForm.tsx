@@ -18,19 +18,19 @@ export default function MorningForm({ today, entry, prompt }: { today: string; e
         <p className="rounded-lg bg-red-50 p-2 text-sm text-red-600">{state.message}</p>
       )}
 
-      <Field label="Scripture reference" name="scripture_ref" defaultValue={entry?.scripture_ref} placeholder="e.g. Psalm 23:1-6" />
-      <Field label="Scripture" name="scripture_text" defaultValue={entry?.scripture_text} textarea rows={4} />
+      <Field label="Scripture" name="scripture_ref" defaultValue={entry?.scripture_ref} placeholder="e.g. Psalm 23:1-6" />
+      <Field label="Who is God" name="scripture_text" defaultValue={entry?.scripture_text} textarea rows={4} />
 
       <Field
-        label="Observation"
+        label="Message"
         hint={prompt?.body ?? 'What does this passage reveal about God\u2019s character?'}
         name="observation"
         defaultValue={entry?.observation}
         textarea
         rows={4}
       />
-      <Field label="Application" hint="How does this shape what you do today?" name="application" defaultValue={entry?.application} textarea rows={4} />
-      <Field label="Prayer points" name="prayer_points" defaultValue={entry?.prayer_points} textarea rows={4} />
+      <Field label="Reflection" hint="How does this shape what you do today?" name="application" defaultValue={entry?.application} textarea rows={4} />
+      <Field label="Application" name="prayer_points" defaultValue={entry?.prayer_points} textarea rows={4} />
 
       <EntryShareControls
         defaultVisibility={entry?.visibility ?? 'private'}
