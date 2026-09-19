@@ -37,7 +37,7 @@ export default async function RankingsPage({
         <h1 className="font-serif text-2xl text-ink">Rankings</h1>
         <nav className="flex gap-1 text-sm">
           {['week', 'month', 'year'].map((p) => (
-            
+            <a
               key={p}
               href={`/rankings?period=${p}&scope=${scope}`}
               className={`rounded-full px-3 py-1 ${p === period ? 'btn-primary' : 'text-muted'}`}
@@ -50,7 +50,7 @@ export default async function RankingsPage({
 
       <div className="flex gap-2 text-sm">
         {['church', 'group'].map((s) => (
-          
+          <a
             key={s}
             href={`/rankings?period=${period}&scope=${s}`}
             className={`rounded-lg border border-line px-3 py-1 ${s === scope ? 'bg-surface text-ink' : 'text-muted'}`}
