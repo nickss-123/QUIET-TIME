@@ -3,7 +3,13 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
-export async function saveMorningEntry(form: FormData) {
+type MorningState = { ok: false; message: string } | { ok: true }
+
+export async function saveMorningEntry(
+  _prevState: MorningState,
+  form: FormData
+): Promise<MorningState> {
+  
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not signed in')
