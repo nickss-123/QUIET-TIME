@@ -24,4 +24,63 @@ export default function MorningForm({ today, entry, prompt }: { today: string; e
       <Field
         label="Observation"
         hint={prompt?.body ?? 'What does this passage reveal about God\u2019s character?'}
-        
+        name="observation"
+        defaultValue={entry?.observation}
+        textarea
+        rows={4}
+      />
+      <Field label="Application" hint="How does this shape what you do today?" name="application" defaultValue={entry?.application} textarea rows={4} />
+      <Field label="Prayer points" name="prayer_points" defaultValue={entry?.prayer_points} textarea rows={4} />
+
+      <EntryShareControls
+        defaultVisibility={entry?.visibility ?? 'private'}
+        defaultPrayerRequest={entry?.is_prayer_request ?? false}
+      />
+
+      <SaveButton />
+    </form>
+  )
+}
+
+function Field({
+  label,
+  hint,
+  name,
+  defaultValue,
+  placeholder,
+  textarea,
+  rows = 3,
+}: {
+  label: string
+  hint?: string
+  name: string
+  defaultValue?: string | null
+  placeholder?: string
+  textarea?: boolean
+  rows?: number
+}) {
+  return (
+    <div>
+      <label className="mb-1 block text-sm font-medium text-ink" htmlFor={name}>{label}</label>
+      {hint && <p className="mb-1 text-xs text-muted">{hint}</p>}
+      {textarea ? (
+        <textarea
+          id={name}
+          name={name}
+          rows={rows}
+          defaultValue={defaultValue ?? ''}
+          placeholder={placeholder}
+          className="w-full rounded-lg px-3 py-2"
+        />
+      ) : (
+        <input
+          id={name}
+          name={name}
+          defaultValue={defaultValue ?? ''}
+          placeholder={placeholder}
+          className="w-full rounded-lg px-3 py-2"
+        />
+      )}
+    </div>
+  )
+}
