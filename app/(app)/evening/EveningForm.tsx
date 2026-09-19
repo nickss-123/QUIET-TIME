@@ -19,22 +19,67 @@ export default function EveningForm({ today, entry, prompt }: { today: string; e
         <p className="rounded-lg bg-red-50 p-2 text-sm text-red-600">{state.message}</p>
       )}
 
-      <Field label="Where did you see God today?" hint={prompt?.body} name="presence_of_god" defaultValue={entry?.presence_of_god} />
-      <Field label="Blessings" name="blessings" defaultValue={entry?.blessings} />
-      <Field label="Growth" hint="What did today teach you about your own heart?" name="growth" defaultValue={entry?.growth} />
-      <Field label="Struggles" name="struggles" defaultValue={entry?.struggles} />
+      <h2 className="font-serif text-xl text-ink">Spiritual Journal Movement Checklist</h2>
 
-      <div>
-        <label className="mb-1 block text-sm font-medium text-ink">How was today, overall?</label>
-        <div className="flex gap-2">
-          {[1, 2, 3, 4, 5].map((n) => (
-            <label key={n} className="flex flex-1 cursor-pointer flex-col items-center rounded-lg border border-line py-2 text-sm">
-              <input type="radio" name="mood" value={n} defaultChecked={entry?.mood === n} className="sr-only" />
-              {n}
-            </label>
-          ))}
-        </div>
-      </div>
+      <Choice
+        label="Did I live today conscious of the Holy Spirit?"
+        name="holy_spirit_conscious"
+        options={['Always', 'Sometimes', 'Forgot']}
+        defaultValue={entry?.holy_spirit_conscious}
+      />
+      <Choice
+        label="Did I live a life of Coram Deo today?"
+        name="coram_deo"
+        options={['Yes', 'Sometimes', 'No']}
+        defaultValue={entry?.coram_deo}
+      />
+      <Choice
+        label='Did I "One Minute Prayer" every moment today?'
+        name="one_minute_prayer"
+        options={['Always', 'Sometimes', 'No']}
+        defaultValue={entry?.one_minute_prayer}
+      />
+      <Choice
+        label="Did I experience the supernatural joy and peace given by God when praying amidst anxiety today?"
+        name="supernatural_joy_peace"
+        options={['Yes', 'Sometimes', 'No']}
+        defaultValue={entry?.supernatural_joy_peace}
+      />
+
+      <Field
+        label="Did I seek the guidance of the Holy Spirit immediately during a crisis situation?"
+        hint="e.g."
+        name="holy_spirit_guidance_crisis"
+        defaultValue={entry?.holy_spirit_guidance_crisis}
+      />
+      <Field
+        label="Did I love, endure, and forgive for the sake of Jesus today?"
+        hint="e.g."
+        name="love_endure_forgive"
+        defaultValue={entry?.love_endure_forgive}
+      />
+      <Field
+        label="What grace did I receive today?"
+        hint="e.g. from God, from others..."
+        name="grace_received"
+        defaultValue={entry?.grace_received}
+      />
+      <Field
+        label="What am I thankful for?"
+        hint="e.g. to God, to others..."
+        name="thankful_for"
+        defaultValue={entry?.thankful_for}
+      />
+      <Field
+        label="What do I need to repent of?"
+        name="repent_of"
+        defaultValue={entry?.repent_of}
+      />
+      <Field
+        label="Prayer requests?"
+        name="prayer_requests"
+        defaultValue={entry?.prayer_requests}
+      />
 
       <EntryShareControls
         defaultVisibility={entry?.visibility ?? 'private'}
@@ -52,6 +97,32 @@ function Field({ label, hint, name, defaultValue }: { label: string; hint?: stri
       <label className="mb-1 block text-sm font-medium text-ink" htmlFor={name}>{label}</label>
       {hint && <p className="mb-1 text-xs text-muted">{hint}</p>}
       <textarea id={name} name={name} rows={3} defaultValue={defaultValue ?? ''} className="w-full rounded-lg px-3 py-2" />
+    </div>
+  )
+}
+
+function Choice({
+  label,
+  name,
+  options,
+  defaultValue,
+}: {
+  label: string
+  name: string
+  options: string[]
+  defaultValue?: string | null
+}) {
+  return (
+    <div>
+      <label className="mb-1 block text-sm font-medium text-ink">{label}</label>
+      <div className="flex gap-2">
+        {options.map((opt) => (
+          <label key={opt} className="flex flex-1 cursor-pointer flex-col items-center rounded-lg border border-line py-2 text-sm">
+            <input type="radio" name={name} value={opt} defaultChecked={defaultValue === opt} className="sr-only" />
+            {opt}
+          </label>
+        ))}
+      </div>
     </div>
   )
 }
