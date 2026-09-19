@@ -3,7 +3,12 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
-export async function saveEveningEntry(form: FormData) {
+type EveningState = { ok: false; message: string } | { ok: true }
+
+export async function saveEveningEntry(
+  _prevState: EveningState,
+  form: FormData
+): Promise<EveningState> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not signed in')
@@ -27,10 +32,10 @@ export async function saveEveningEntry(form: FormData) {
     { onConflict: 'user_id,entry_date,kind' }
   )
 
-  if (error) return { ok: false as const, message: error.message }
+  if (error) return { ok: false, message: error.message }
 
   revalidatePath('/dashboard')
   revalidatePath('/logs')
   revalidatePath('/rankings')
-  return { ok: true as const }
+  return { ok: true }
 }
