@@ -1,41 +1,22 @@
 import Link from 'next/link'
-import type { Metadata } from 'next'
-import './globals.css'
 import { createClient } from '@/lib/supabase/server'
 import SignOutButton from '@/components/SignOutButton'
 import Avatar from '@/components/Avatar'
 import { getDictionary } from '@/lib/i18n/dictionary'
-import { isThemeId, overridesFromProfile, overridesToStyle } from '@/lib/themes'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-export const metadata: Metadata = {
-  title: 'Quiet Time',
-  description: 'A daily spiritual journal',
-}
-
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // Apply the signed-in member's saved theme and colour overrides on the server,
-  // so every page (including /admin) renders in their colours with no flash.
-const supabase = await createClient()
-const { data: { user } } = await supabase.auth.getUser()
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   let profile: { display_name: string; avatar_path: string | null; role: string; locale: string | null } | null = null
-  let theme = 'dawn'
-  let style: React.CSSProperties | undefined
-if (user) {
-const { data } = await supabase
-.from('profiles')
+  if (user) {
+    const { data } = await supabase
+      .from('profiles')
       .select('display_name, avatar_path, role, locale')
-      .select('theme, accent_color, custom_colors')
-.eq('id', user.id)
+      .eq('id', user.id)
       .single()
     profile = data
-      .maybeSingle()
-    if (data) {
-      if (isThemeId(data.theme)) theme = data.theme
-      style = overridesToStyle(overridesFromProfile(data.accent_color, data.custom_colors))
-    }
-}
+  }
 
   const dict = getDictionary(profile?.locale ?? 'en')
 
@@ -48,7 +29,7 @@ const { data } = await supabase
     { href: '/profile', label: dict.nav.profile },
   ]
 
-return (
+  return (
     <div className="min-h-dvh bg-bg">
       <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
@@ -78,8 +59,5 @@ return (
       </header>
       <main className="mx-auto max-w-4xl px-4 py-6">{children}</main>
     </div>
-    <html lang="en" data-theme={theme} style={style}>
-      <body>{children}</body>
-    </html>
-)
+  )
 }
