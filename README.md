@@ -13,9 +13,10 @@ Deploys to Vercel.
 ## 1. Set up Supabase
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. In the SQL editor, run `supabase/migrations/0001_init.sql`, then
-   `supabase/migrations/0002_rankings_themes_avatars.sql`, in that order.
-3. In Project Settings \u2192 API, copy the Project URL, `anon` public key, and sb_publishable_rJBE7rtJfCxM9jRiwcYExQ_aYI-csor sb_secret_tDZ0D-GME0kVc_xgx_1f-g_H-nA0bRU
+2. In the SQL editor, run `supabase/migrations/0001_init.sql`,
+   `supabase/migrations/0002_rankings_themes_avatars.sql`, then
+   `supabase/migrations/0003_evening_fields.sql`, in that order.
+3. In Project Settings \u2192 API, copy the Project URL, the `anon` public key, and the
    `service_role` secret key.
 4. Create your own admin account:
    - Authentication \u2192 Users \u2192 Add user. Use any email (it won't be used
