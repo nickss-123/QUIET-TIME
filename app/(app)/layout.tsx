@@ -25,6 +25,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     { href: '/morning', label: dict.nav.morning },
     { href: '/evening', label: dict.nav.evening },
     { href: '/logs', label: dict.nav.pastLogs },
+    { href: '/community', label: dict.nav.community },
     { href: '/rankings', label: dict.nav.rankings },
     { href: '/profile', label: dict.nav.profile },
   ]
