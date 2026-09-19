@@ -13,11 +13,17 @@ const THEMES: { id: string; label: string }[] = [
   { id: 'ink', label: 'Ink' },
 ]
 
+const LANGUAGES: { id: string; label: string }[] = [
+  { id: 'en', label: 'English' },
+  { id: 'ko', label: '한국어' },
+]
+
 const initialState = { ok: true as const }
 
 export default function AppearanceForm({ profile }: { profile: any }) {
   const [state, formAction] = useActionState(updateAppearance, initialState)
   const [selectedTheme, setSelectedTheme] = useState<string>(profile.theme ?? 'dawn')
+  const [selectedLocale, setSelectedLocale] = useState<string>(profile.locale ?? 'en')
 
   function previewTheme(themeId: string) {
     setSelectedTheme(themeId)
@@ -61,6 +67,35 @@ export default function AppearanceForm({ profile }: { profile: any }) {
         </div>
         <p className="mt-2 text-xs text-muted">
           Preview updates immediately. Click Save below to keep it.
+        </p>
+      </div>
+
+      <div>
+        <p className="mb-2 text-sm text-muted">Language</p>
+        <div className="grid grid-cols-2 gap-2">
+          {LANGUAGES.map((l) => (
+            <label
+              key={l.id}
+              className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg border p-3 transition-colors ${
+                selectedLocale === l.id
+                  ? 'border-accent ring-2 ring-accent ring-offset-1'
+                  : 'border-line'
+              } bg-bg`}
+            >
+              <input
+                type="radio"
+                name="locale"
+                value={l.id}
+                checked={selectedLocale === l.id}
+                onChange={() => setSelectedLocale(l.id)}
+                className="sr-only"
+              />
+              <span className="text-sm text-ink">{l.label}</span>
+            </label>
+          ))}
+        </div>
+        <p className="mt-2 text-xs text-muted">
+          Takes effect after you save.
         </p>
       </div>
 
