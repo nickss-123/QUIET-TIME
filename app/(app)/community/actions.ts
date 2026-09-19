@@ -17,9 +17,13 @@ export async function addComment(
   if (!body) return { ok: false, message: 'Write something before posting.' }
   if (body.length > 2000) return { ok: false, message: 'That\u2019s too long \u2014 keep it under 2000 characters.' }
 
+  const parentIdRaw = form.get('parent_id') as string | null
+  const parentId = parentIdRaw && parentIdRaw.trim() !== '' ? parentIdRaw : null
+
   const { error } = await supabase.from('comments').insert({
     user_id: user.id,
     body,
+    parent_id: parentId,
   })
 
   if (error) return { ok: false, message: error.message }
