@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { addComment, deleteComment, sendChat, deleteChat } from './actions'
 import Avatar from '@/components/Avatar'
 import SaveButton from '@/components/SaveButton'
+import ChatSendButton from '@/components/ChatSendButton'
 import type { ChatMessage } from '@/lib/types'
 
 type Comment = {
@@ -301,7 +302,7 @@ function ChatRoom({
             rows={1}
             maxLength={2000}
             placeholder={anonymous ? 'Message as Anonymous…' : 'Message…'}
-            className="min-h-[44px] flex-1 resize-none rounded-lg px-3 py-2 text-sm"
+            className="min-h-[44px] w-full flex-1 resize-none rounded-lg px-3 py-2 text-sm"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
@@ -309,7 +310,7 @@ function ChatRoom({
               }
             }}
           />
-          <SaveButton label="Send" />
+          <ChatSendButton />
         </div>
         {allowAnonymous && (
           <label className="flex items-center gap-2 text-xs text-muted">
