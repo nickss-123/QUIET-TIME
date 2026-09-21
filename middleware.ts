@@ -26,7 +26,23 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  // A network failure (offline, or Supabase temporarily unreachable) comes
+  // back as an error here too -- previously that was treated exactly like
+  // "not logged in" and forced a redirect to /login. Only redirect when
+  // Supabase actually confirms there's no session; on a network error, let
+  // the request through so the PWA keeps working offline instead of
+  // logging people out every time they lose signal.
+  const isNetworkError =
+    error &&
+    (error.name === 'AuthRetryableFetchError' ||
+      /fetch failed|failed to fetch|network/i.test(error.message ?? ''))
+
+  if (isNetworkError) {
+    return response
+  }
+
   const path = request.nextUrl.pathname
   const isPublic = PUBLIC_PATHS.some((p) => path.startsWith(p))
 
