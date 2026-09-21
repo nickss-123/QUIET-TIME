@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { createClient } from '@/lib/supabase/server'
 import { isThemeId, overridesFromProfile, overridesToStyle } from '@/lib/themes'
@@ -8,7 +8,6 @@ export const metadata: Metadata = {
   title: 'Quiet Time',
   description: 'A daily spiritual journal',
   manifest: '/manifest.json',
-  themeColor: '#f5b261',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -18,6 +17,10 @@ export const metadata: Metadata = {
     icon: [{ url: '/icons/favicon-32.png', sizes: '32x32' }],
     apple: [{ url: '/icons/apple-touch-icon.png' }],
   },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#f5b261',
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
