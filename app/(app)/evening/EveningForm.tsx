@@ -2,14 +2,67 @@
 'use client'
 
 import { useActionState, useState } from 'react'
-import { saveEveningEntry } from './actions'
+import { createClient } from '@/lib/supabase/client'
+import { queueEntry, isNetworkError } from '@/lib/offlineQueue'
 import EntryShareControls from '@/components/EntryShareControls'
 import SaveButton from '@/components/SaveButton'
 
-const initialState = { ok: true as const }
+type State = { ok: true; offline?: boolean } | { ok: false; message: string }
+const initialState: State = { ok: true }
 
-export default function EveningForm({ today, entry, prompt }: { today: string; entry: any; prompt: any }) {
-  const [state, formAction] = useActionState(saveEveningEntry, initialState)
+export default function EveningForm({
+  today,
+  entry,
+  prompt,
+  userId,
+}: {
+  today: string
+  entry: any
+  prompt: any
+  userId: string
+}) {
+  async function handleSubmit(_prev: State, form: FormData): Promise<State> {
+    const entry_date = (form.get('entry_date') as string) || today
+    const payload = {
+      user_id: userId,
+      entry_date,
+      kind: 'evening' as const,
+      holy_spirit_conscious: (form.get('holy_spirit_conscious') as string) || null,
+      coram_deo: (form.get('coram_deo') as string) || null,
+      one_minute_prayer: (form.get('one_minute_prayer') as string) || null,
+      supernatural_joy_peace: (form.get('supernatural_joy_peace') as string) || null,
+      holy_spirit_guidance_crisis: (form.get('holy_spirit_guidance_crisis') as string) || null,
+      love_endure_forgive: (form.get('love_endure_forgive') as string) || null,
+      grace_received: (form.get('grace_received') as string) || null,
+      thankful_for: (form.get('thankful_for') as string) || null,
+      repent_of: (form.get('repent_of') as string) || null,
+      prayer_requests: (form.get('prayer_requests') as string) || null,
+      visibility: form.get('visibility') === 'shared_with_admin' ? 'shared_with_admin' : 'private',
+      is_prayer_request: form.get('prayer_request') === 'on',
+    }
+
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      queueEntry('evening', entry_date, payload)
+      return { ok: true, offline: true }
+    }
+
+    try {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('entries')
+        .upsert(payload, { onConflict: 'user_id,entry_date,kind' })
+      if (error) throw error
+      return { ok: true }
+    } catch (e: any) {
+      if (isNetworkError(e)) {
+        queueEntry('evening', entry_date, payload)
+        return { ok: true, offline: true }
+      }
+      return { ok: false, message: e?.message ?? 'Could not save. Try again.' }
+    }
+  }
+
+  const [state, formAction] = useActionState(handleSubmit, initialState)
 
   return (
     <form action={formAction} className="space-y-5">
@@ -17,6 +70,11 @@ export default function EveningForm({ today, entry, prompt }: { today: string; e
 
       {!state.ok && (
         <p className="rounded-lg bg-red-50 p-2 text-sm text-red-600">{state.message}</p>
+      )}
+      {state.ok && state.offline && (
+        <p className="rounded-lg bg-amber-50 p-2 text-sm text-amber-700">
+          Saved on this device {'\u2014'} you're offline, so it'll sync automatically once you're back online.
+        </p>
       )}
 
       <h2 className="font-serif text-xl text-ink">Spiritual Journal Movement Checklist</h2>
