@@ -2,10 +2,22 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { createClient } from '@/lib/supabase/server'
 import { isThemeId, overridesFromProfile, overridesToStyle } from '@/lib/themes'
+import { RegisterServiceWorker } from '@/components/RegisterServiceWorker'
 
 export const metadata: Metadata = {
   title: 'Quiet Time',
   description: 'A daily spiritual journal',
+  manifest: '/manifest.json',
+  themeColor: '#f5b261',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Quiet Time',
+  },
+  icons: {
+    icon: [{ url: '/icons/favicon-32.png', sizes: '32x32' }],
+    apple: [{ url: '/icons/apple-touch-icon.png' }],
+  },
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -30,7 +42,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" data-theme={theme} style={style}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <RegisterServiceWorker />
+      </body>
     </html>
   )
 }
