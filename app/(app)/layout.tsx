@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import SignOutButton from '@/components/SignOutButton'
 import Avatar from '@/components/Avatar'
+import OfflineSyncBanner from '@/components/OfflineSyncBanner'
 import { getDictionary } from '@/lib/i18n/dictionary'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -58,7 +59,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           ))}
         </nav>
       </header>
-      <main className="mx-auto max-w-4xl px-4 py-6">{children}</main>
+      <main className="mx-auto max-w-4xl px-4 py-6">
+        <OfflineSyncBanner />
+        {children}
+      </main>
     </div>
   )
 }
