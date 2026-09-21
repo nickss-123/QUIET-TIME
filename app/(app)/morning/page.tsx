@@ -28,7 +28,7 @@ export default async function MorningPage() {
     <div className="max-w-2xl">
       <h1 className="mb-1 font-serif text-2xl text-ink">Morning devotion</h1>
       <p className="mb-6 text-sm text-muted">{today}</p>
-      <MorningForm today={today} entry={entry} prompt={prompt} />
+      <MorningForm today={today} entry={entry} prompt={prompt} userId={user!.id} />
     </div>
   )
 }
