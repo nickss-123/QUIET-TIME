@@ -15,7 +15,7 @@ export default async function EveningPage() {
     <div className="max-w-2xl">
       <h1 className="mb-1 font-serif text-2xl text-ink">Evening diary</h1>
       <p className="mb-6 text-sm text-muted">{today}</p>
-      <EveningForm today={today} entry={entry} prompt={prompt} />
+      <EveningForm today={today} entry={entry} prompt={prompt} userId={user!.id} />
     </div>
   )
 }
