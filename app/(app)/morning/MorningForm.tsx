@@ -1,14 +1,63 @@
 'use client'
 
 import { useActionState } from 'react'
-import { saveMorningEntry } from './actions'
+import { createClient } from '@/lib/supabase/client'
+import { queueEntry, isNetworkError } from '@/lib/offlineQueue'
 import EntryShareControls from '@/components/EntryShareControls'
 import SaveButton from '@/components/SaveButton'
 
-const initialState = { ok: true as const }
+type State = { ok: true; offline?: boolean } | { ok: false; message: string }
+const initialState: State = { ok: true }
 
-export default function MorningForm({ today, entry, prompt }: { today: string; entry: any; prompt: any }) {
-  const [state, formAction] = useActionState(saveMorningEntry, initialState)
+export default function MorningForm({
+  today,
+  entry,
+  prompt,
+  userId,
+}: {
+  today: string
+  entry: any
+  prompt: any
+  userId: string
+}) {
+  async function handleSubmit(_prev: State, form: FormData): Promise<State> {
+    const entry_date = (form.get('entry_date') as string) || today
+    const payload = {
+      user_id: userId,
+      entry_date,
+      kind: 'morning' as const,
+      scripture_ref: (form.get('scripture_ref') as string) || null,
+      scripture_text: (form.get('scripture_text') as string) || null,
+      observation: (form.get('observation') as string) || null,
+      application: (form.get('application') as string) || null,
+      prayer_points: (form.get('prayer_points') as string) || null,
+      visibility: form.get('visibility') === 'shared_with_admin' ? 'shared_with_admin' : 'private',
+      is_prayer_request: form.get('prayer_request') === 'on',
+    }
+
+    // No connection at all \u2014 don't even try the network, just queue it.
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      queueEntry('morning', entry_date, payload)
+      return { ok: true, offline: true }
+    }
+
+    try {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('entries')
+        .upsert(payload, { onConflict: 'user_id,entry_date,kind' })
+      if (error) throw error
+      return { ok: true }
+    } catch (e: any) {
+      if (isNetworkError(e)) {
+        queueEntry('morning', entry_date, payload)
+        return { ok: true, offline: true }
+      }
+      return { ok: false, message: e?.message ?? 'Could not save. Try again.' }
+    }
+  }
+
+  const [state, formAction] = useActionState(handleSubmit, initialState)
 
   return (
     <form action={formAction} className="space-y-5">
@@ -16,6 +65,11 @@ export default function MorningForm({ today, entry, prompt }: { today: string; e
 
       {!state.ok && (
         <p className="rounded-lg bg-red-50 p-2 text-sm text-red-600">{state.message}</p>
+      )}
+      {state.ok && state.offline && (
+        <p className="rounded-lg bg-amber-50 p-2 text-sm text-amber-700">
+          Saved on this device {'\u2014'} you're offline, so it'll sync automatically once you're back online.
+        </p>
       )}
 
       <Field label="Scripture" name="scripture_ref" defaultValue={entry?.scripture_ref} placeholder="e.g. Psalm 23:1-6" />
