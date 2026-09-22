@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import OfflineLink from '@/components/OfflineLink'
 import { createClient } from '@/lib/supabase/server'
 import Avatar from '@/components/Avatar'
 import SignOutButton from '@/components/SignOutButton'
@@ -47,7 +47,7 @@ export default async function ProfilePage() {
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {ITEMS.map(({ href, label, hint, Icon }) => (
-          <Link
+          <OfflineLink
             key={href}
             href={href}
             className="card flex flex-col items-center gap-2 p-4 text-center hover:bg-bg"
@@ -57,7 +57,7 @@ export default async function ProfilePage() {
             </span>
             <span className="text-sm font-medium text-ink">{label}</span>
             <span className="text-xs text-muted">{hint}</span>
-          </Link>
+          </OfflineLink>
         ))}
       </section>
 
