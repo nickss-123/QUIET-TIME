@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import MorningForm from '@/app/(app)/morning/MorningForm'
 import EveningForm from '@/app/(app)/evening/EveningForm'
 import { ENTRY_FIELDS, LEGACY_FIELDS, type FieldDef } from '@/lib/entryFields'
 import type { Entry } from '@/lib/types'
 import { requestDeletion, cancelDeletionRequest } from '../actions'
+import { listQueue } from '@/lib/offlineQueue'
 
 // One day's QT: the morning and evening entries shown together. Each half is
 // readable and, with a tap on "Edit", editable in place using the same form
@@ -26,22 +27,36 @@ export default function DayView({
   userId: string
   pendingRequest: { id: string; created_at: string } | null
 }) {
+  // A morning/evening save made while offline lives only in this device's
+  // local queue until it syncs. Merge it over the server copy so this page
+  // shows the real, just-saved content instead of "Not logged for this day."
+  const [morningEntry, setMorningEntry] = useState(morning)
+  const [eveningEntry, setEveningEntry] = useState(evening)
+
+  useEffect(() => {
+    const queued = listQueue()
+    const qm = queued.find((i) => i.key === `morning:${date}`)
+    const qe = queued.find((i) => i.key === `evening:${date}`)
+    setMorningEntry(qm ? ({ ...(morning ?? {}), ...qm.payload } as Entry) : morning)
+    setEveningEntry(qe ? ({ ...(evening ?? {}), ...qe.payload } as Entry) : evening)
+  }, [morning, evening, date])
+
   return (
     <div className="space-y-6">
       <Section
         title="Morning devotion"
-        entry={morning}
+        entry={morningEntry}
         kind="morning"
         editor={(done) => (
-          <MorningForm today={date} entry={morning} prompt={prompts.morning} userId={userId} onSaved={done} />
+          <MorningForm today={date} entry={morningEntry} prompt={prompts.morning} userId={userId} onSaved={done} />
         )}
       />
       <Section
         title="Evening diary"
-        entry={evening}
+        entry={eveningEntry}
         kind="evening"
         editor={(done) => (
-          <EveningForm today={date} entry={evening} prompt={prompts.evening} userId={userId} onSaved={done} />
+          <EveningForm today={date} entry={eveningEntry} prompt={prompts.evening} userId={userId} onSaved={done} />
         )}
       />
       <DeleteBox date={date} pendingRequest={pendingRequest} />
