@@ -3,6 +3,7 @@ import './globals.css'
 import { createClient } from '@/lib/supabase/server'
 import { isThemeId, overridesFromProfile, overridesToStyle } from '@/lib/themes'
 import { RegisterServiceWorker } from '@/components/RegisterServiceWorker'
+import { OfflineLinkGuard } from '@/components/OfflineLinkGuard'
 
 export const metadata: Metadata = {
   title: 'Quiet Time',
@@ -48,6 +49,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         {children}
         <RegisterServiceWorker />
+        <OfflineLinkGuard />
       </body>
     </html>
   )
