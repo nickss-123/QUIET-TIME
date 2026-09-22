@@ -1,7 +1,7 @@
 'use client'
 
 import type React from 'react'
-import Link from 'next/link'
+import OfflineLink from './OfflineLink'
 import { usePathname } from 'next/navigation'
 import { SunIcon, MoonIcon, ChatIcon, TrophyIcon, UserIcon, HomeIcon, ShieldIcon } from './NavIcons'
 
@@ -39,7 +39,7 @@ export default function BottomNav({
             (item.key === 'profile' && pathname.startsWith('/logs'))
           return (
             <li key={item.href} className="flex-1">
-              <Link
+              <OfflineLink
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
                 className={
@@ -49,7 +49,7 @@ export default function BottomNav({
               >
                 <Icon className={'h-6 w-6 ' + (active ? 'stroke-[2.2]' : '')} />
                 <span className="mt-1 truncate">{item.label}</span>
-              </Link>
+              </OfflineLink>
             </li>
           )
         })}
