@@ -25,8 +25,13 @@ export function RegisterServiceWorker() {
     let timer: number | undefined
     let registration: ServiceWorkerRegistration | undefined
 
+    const warm = () => (registration?.active ?? navigator.serviceWorker.controller)?.postMessage({ type: 'WARM_CACHE' })
     const check = () => {
-      if (navigator.onLine) registration?.update().catch(() => {})
+      if (!navigator.onLine) return
+      registration?.update().catch(() => {})
+      // Re-cache every tab's latest content whenever we're back online, so
+      // the offline copy doesn't go stale for the rest of the session.
+      warm()
     }
     const onVisible = () => {
       if (document.visibilityState === 'visible') check()
@@ -46,7 +51,6 @@ export function RegisterServiceWorker() {
             }
           })
         })
-        const warm = () => (reg.active ?? navigator.serviceWorker.controller)?.postMessage({ type: 'WARM_CACHE' })
         if (reg.active) warm()
         else navigator.serviceWorker.ready.then(warm)
 
