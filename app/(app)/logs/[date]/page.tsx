@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import OfflineLink from '@/components/OfflineLink'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import type { Entry } from '@/lib/types'
@@ -33,14 +33,18 @@ export default async function DayPage({ params }: { params: Promise<{ date: stri
   const entries = (rows ?? []) as Entry[]
   const morning = entries.find((e) => e.kind === 'morning') ?? null
   const evening = entries.find((e) => e.kind === 'evening') ?? null
-  if (!morning && !evening) notFound()
+  // Not calling notFound() here even when both are null: a locally-queued,
+  // not-yet-synced entry for this date might exist only in the browser's
+  // offline queue, which the server can't see. DayView checks that queue
+  // client-side and shows the real content if it finds one; if truly
+  // nothing exists, each section already shows "Not logged for this day."
 
   const promptFor = (kind: 'morning' | 'evening') => (prompts ?? []).find((p: any) => p.kind === kind) ?? null
 
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <Link href="/logs" className="text-sm text-muted hover:text-ink">{'\u2190'} Past logs</Link>
+        <OfflineLink href="/logs" className="text-sm text-muted hover:text-ink">{'\u2190'} Past logs</OfflineLink>
         <h1 className="mt-2 font-serif text-2xl text-ink">{prettyDate(date)}</h1>
         <p className="text-sm text-muted">
           {morning && evening ? 'Morning and evening' : morning ? 'Morning only' : 'Evening only'}
