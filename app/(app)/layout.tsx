@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import OfflineLink from '@/components/OfflineLink'
 import { createClient } from '@/lib/supabase/server'
 import Avatar from '@/components/Avatar'
 import OfflineSyncBanner from '@/components/OfflineSyncBanner'
@@ -38,11 +38,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="min-h-dvh bg-bg">
       <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-          <Link href={isAdmin ? '/dashboard' : '/morning'} className="font-serif text-lg text-ink">Quiet Time</Link>
-          <Link href="/profile" className="flex items-center gap-2" aria-label={dict.nav.profile}>
+          <OfflineLink href={isAdmin ? '/dashboard' : '/morning'} className="font-serif text-lg text-ink">Quiet Time</OfflineLink>
+          <OfflineLink href="/profile" className="flex items-center gap-2" aria-label={dict.nav.profile}>
             <span className="hidden text-sm text-ink sm:inline">{profile?.display_name}</span>
             <Avatar path={profile?.avatar_path ?? null} size={28} />
-          </Link>
+          </OfflineLink>
         </div>
       </header>
       <main className="mx-auto max-w-4xl px-4 py-6 pb-28">
