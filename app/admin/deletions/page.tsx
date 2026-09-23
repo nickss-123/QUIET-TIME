@@ -4,11 +4,20 @@ import DeletionsClient, { type Row } from './DeletionsClient'
 export default async function DeletionsPage() {
   const supabase = await createClient()
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('deletion_requests')
-    .select('id, user_id, entry_date, reason, status, created_at, decided_at, profiles(display_name, username)')
+    // `deletion_requests` has two FKs into `profiles` (user_id and
+    // decided_by), so a bare `profiles(...)` embed is ambiguous to
+    // PostgREST and silently returns no rows — `!user_id` pins it to the
+    // right one. This was the actual bug: the badge count (a plain select,
+    // no embed) worked fine, but this listing query was failing quietly.
+    .select('id, user_id, entry_date, reason, status, created_at, decided_at, profiles!user_id(display_name, username)')
     .order('created_at', { ascending: false })
     .limit(200)
+
+  if (error) {
+    console.error('Failed to load deletion requests:', error.message)
+  }
 
   const rows = (data ?? []).map((r: any) => ({
     ...r,
