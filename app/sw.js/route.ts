@@ -17,6 +17,7 @@ const PAGE_CACHE = 'qt-pages-' + VERSION;
 const ASSET_CACHE = 'qt-assets-' + VERSION;
 const MEDIA_CACHE = 'qt-media-v1';
 const OFFLINE_URL = '/offline.html';
+const LOGIN_URL = '/login';
 const APP_ROUTES = ['/morning', '/evening', '/community', '/rankings', '/profile', '/logs', '/dashboard'];
 const NETWORK_TIMEOUT_MS = 8000;
 
@@ -117,15 +118,23 @@ self.addEventListener('fetch', (event) => {
 
 async function handleNavigate(req, url) {
   const cache = await caches.open(PAGE_CACHE);
+  // /login is reachable by anyone (a plain "Add to Home Screen" bookmark on
+  // some browsers points here instead of the real start_url), so its HTML
+  // is never a reliable signal of whether *this* visitor is signed in.
+  // Never write or read it from the offline page cache -- treat every
+  // offline hit on it as "find them a real signed-in page instead."
+  const isLogin = url.pathname === LOGIN_URL;
   try {
     const res = await withTimeout(fetch(req), NETWORK_TIMEOUT_MS);
-    if (res.ok && !res.redirected && res.type === 'basic') {
+    if (res.ok && !res.redirected && res.type === 'basic' && !isLogin) {
       cache.put(pageKey(url.pathname), res.clone());
     }
     return res;
   } catch (e) {
-    const cached = await cache.match(pageKey(url.pathname));
-    if (cached) return cached;
+    if (!isLogin) {
+      const cached = await cache.match(pageKey(url.pathname));
+      if (cached) return cached;
+    }
     for (const path of APP_ROUTES) {
       const any = await cache.match(pageKey(path));
       if (any) return any;
